@@ -29,3 +29,5 @@ A simple shopping wishlist chatbot built with Python using the Flask web framewo
    ```bash
    git clone https://github.com/yourusername/shopping-wishlist-chatbot.git
    cd shopping-wishlist-chatbot
+To run 
+python3 -m http.server 8000 -d price-tracker
