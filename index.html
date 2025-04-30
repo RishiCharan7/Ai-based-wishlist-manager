@@ -1,77 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Wishlist Chatbot</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-        .chatbox {
-            height: 400px;
-            overflow-y: scroll;
-            border: 1px solid #ccc;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        .message {
-            margin: 5px 0;
-        }
-        .user {
-            text-align: right;
-            color: #007bff;
-        }
-        .bot {
-            text-align: left;
-            color: #28a745;
-        }
-        .input-group {
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Price Tracker Wishlist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center">Shopping Wishlist Chatbot</h1>
-        <div class="chatbox" id="chatbox"></div>
-        <div class="input-group">
-            <input type="text" class="form-control" id="user_input" placeholder="Type your message here..." />
-            <div class="input-group-append">
-                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
-            </div>
-        </div>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+  <header class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Price Tracker Wishlist</h1>
+  </header>
+
+  <section class="w-full max-w-xl bg-white rounded-lg shadow p-6 mb-6">
+      <form id="addProductForm" class="flex flex-col sm:flex-row gap-4">
+      <input
+        type="text"
+        id="productName"
+        placeholder="Product Name"
+        class="flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        required
+      />
+      <input
+        type="url"
+        id="productURL"
+        placeholder="Product URL"
+        class="flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        required
+      />
+      <input
+        type="number"
+        id="productPrice"
+        placeholder="Price in ₹"
+        min="0"
+        step="0.01"
+        class="w-32 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        required
+      />
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+        title="Add product to wishlist"
+      >
+        <i class="fas fa-plus mr-2 text-xl"></i>Add
+      </button>
+    </form>
+  </section>
+
+  <section class="w-full max-w-xl bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Wishlist</h2>
+    <div id="wishlist" class="space-y-4">
+      <!-- Products will be listed here -->
     </div>
+  </section>
 
-    <script>
-        function sendMessage() {
-            var userInput = document.getElementById("user_input").value;
-            var chatbox = document.getElementById("chatbox");
-            chatbox.innerHTML += "<div class='message user'><strong>You:</strong> " + userInput + "</div>";
+  <section class="w-full max-w-xl bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Recommended Products</h2>
+    <div id="recommendations" class="space-y-4 text-gray-700">
+      <p class="text-gray-500">No recommendations available.</p>
+    </div>
+  </section>
 
-            fetch("/ask", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: "user_input=" + encodeURIComponent(userInput)
-            })
-            .then(response => response.json())
-            .then(data => {
-                chatbox.innerHTML += "<div class='message bot'><strong>Bot:</strong> " + data.response + "</div>";
-                document.getElementById("user_input").value = ""; // Clear input field
-                chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
-            });
+  <script>
+    const form = document.getElementById('addProductForm');
+    const wishlistEl = document.getElementById('wishlist');
+
+    // Load wishlist from localStorage or initialize empty
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+    // Save wishlist to localStorage
+    function saveWishlist() {
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    }
+
+    // Render the wishlist UI
+    function renderWishlist() {
+      wishlistEl.innerHTML = '';
+      if (wishlist.length === 0) {
+        wishlistEl.innerHTML = '<p class="text-gray-500">No products in wishlist.</p>';
+        return;
+      }
+
+      wishlist.forEach((product, index) => {
+        const productEl = document.createElement('div');
+        productEl.className = 'border border-gray-300 rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between';
+
+        // Product info
+        const infoEl = document.createElement('div');
+        infoEl.className = 'mb-3 sm:mb-0';
+
+        const nameEl = document.createElement('h3');
+        nameEl.className = 'text-lg font-semibold text-gray-800';
+        nameEl.textContent = product.name;
+
+        const urlEl = document.createElement('a');
+        urlEl.href = product.url;
+        urlEl.target = '_blank';
+        urlEl.rel = 'noopener noreferrer';
+        urlEl.className = 'text-blue-600 hover:underline block text-sm mb-1 truncate max-w-xs';
+        urlEl.textContent = product.url;
+
+        const priceEl = document.createElement('p');
+        priceEl.className = 'text-gray-600 transition-colors duration-700 flex items-center gap-2';
+        priceEl.textContent = `Current Price: ₹${product.currentPrice.toFixed(2)}`;
+
+        // Show price fluctuation arrow
+        const priceHistory = product.priceHistory;
+        if (priceHistory.length > 1) {
+          const prevPrice = priceHistory[priceHistory.length - 2].price;
+          if (product.currentPrice > prevPrice) {
+            const upArrow = document.createElement('i');
+            upArrow.className = 'fas fa-arrow-up text-green-600';
+            priceEl.appendChild(upArrow);
+          } else if (product.currentPrice < prevPrice) {
+            const downArrow = document.createElement('i');
+            downArrow.className = 'fas fa-arrow-down text-red-600';
+            priceEl.appendChild(downArrow);
+          }
         }
-    </script>
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+        // Highlight price if recently updated (within last 10 seconds)
+        const lastUpdate = new Date(product.priceHistory[product.priceHistory.length - 1].date);
+        const now = new Date();
+        if ((now - lastUpdate) / 1000 < 10) {
+          priceEl.classList.add('bg-yellow-200', 'text-yellow-900', 'rounded', 'px-1');
+          setTimeout(() => {
+            priceEl.classList.remove('bg-yellow-200', 'text-yellow-900', 'rounded', 'px-1');
+          }, 3000);
+        }
+
+        infoEl.appendChild(nameEl);
+        infoEl.appendChild(urlEl);
+        infoEl.appendChild(priceEl);
+
+        // Price history toggle button
+        const toggleHistoryBtn = document.createElement('button');
+        toggleHistoryBtn.className = 'text-blue-600 hover:underline text-sm mb-2 sm:mb-0';
+        toggleHistoryBtn.textContent = 'Show Price History';
+        toggleHistoryBtn.type = 'button';
+
+        // Price history container
+        const historyEl = document.createElement('div');
+        historyEl.className = 'mt-2 hidden text-sm text-gray-700 max-h-40 overflow-y-auto border border-gray-200 rounded p-2 bg-gray-50';
+
+        // Populate price history
+        product.priceHistory.forEach((entry) => {
+          const entryEl = document.createElement('div');
+          const date = new Date(entry.date);
+          entryEl.textContent = `${date.toLocaleDateString()} - ₹${entry.price.toFixed(2)}`;
+          historyEl.appendChild(entryEl);
+        });
+
+        toggleHistoryBtn.addEventListener('click', () => {
+          if (historyEl.classList.contains('hidden')) {
+            historyEl.classList.remove('hidden');
+            toggleHistoryBtn.textContent = 'Hide Price History';
+          } else {
+            historyEl.classList.add('hidden');
+            toggleHistoryBtn.textContent = 'Show Price History';
+          }
+        });
+
+        // Update price input and button
+        const updateForm = document.createElement('form');
+        updateForm.className = 'flex gap-2 items-center';
+
+        const updateInput = document.createElement('input');
+        updateInput.type = 'number';
+        updateInput.min = '0';
+        updateInput.step = '0.01';
+        updateInput.placeholder = 'New Price ₹';
+        updateInput.className = 'w-24 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500';
+        updateInput.required = true;
+
+        const updateBtn = document.createElement('button');
+        updateBtn.type = 'submit';
+        updateBtn.className = 'bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition';
+        updateBtn.textContent = 'Update';
+
+        updateForm.appendChild(updateInput);
+        updateForm.appendChild(updateBtn);
+
+        updateForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const newPrice = parseFloat(updateInput.value);
+          if (isNaN(newPrice) || newPrice < 0) {
+            alert('Please enter a valid price.');
+            return;
+          }
+          product.currentPrice = newPrice;
+          product.priceHistory.push({ date: new Date().toISOString(), price: newPrice });
+          saveWishlist();
+          renderWishlist();
+        });
+
+        // Delete product button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'text-red-600 hover:text-red-800 text-lg';
+        deleteBtn.title = 'Remove product from wishlist';
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt text-xl"></i>';
+        deleteBtn.addEventListener('click', () => {
+          if (confirm(`Remove "${product.name}" from wishlist?`)) {
+            wishlist.splice(index, 1);
+            saveWishlist();
+            renderWishlist();
+          }
+        });
+
+        // Right side container for update and delete
+        const rightSideEl = document.createElement('div');
+        rightSideEl.className = 'flex flex-col sm:flex-row sm:items-center gap-3';
+
+        rightSideEl.appendChild(updateForm);
+        rightSideEl.appendChild(deleteBtn);
+
+        productEl.appendChild(infoEl);
+        productEl.appendChild(toggleHistoryBtn);
+        productEl.appendChild(rightSideEl);
+        productEl.appendChild(historyEl);
+
+        wishlistEl.appendChild(productEl);
+      });
+    }
+
+      // Add product form submit handler
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('productName').value.trim();
+        const url = document.getElementById('productURL').value.trim();
+        const price = parseFloat(document.getElementById('productPrice').value);
+        if (!name || !url || isNaN(price) || price < 0) {
+          alert('Please enter valid product name, URL, and price.');
+          return;
+        }
+        const newProduct = {
+          name,
+          url,
+          currentPrice: price,
+          priceHistory: [{ date: new Date().toISOString(), price }],
+        };
+        wishlist.push(newProduct);
+        saveWishlist();
+        renderWishlist();
+        form.reset();
+      });
+
+      // Simulate real-time price updates by randomly adjusting prices every minute
+      function simulatePriceUpdate() {
+        let updated = false;
+        wishlist.forEach((product) => {
+          // Randomly decide whether to update price (50% chance)
+          if (Math.random() < 0.5) {
+            // Random price change between -5% and +5%
+            const changePercent = (Math.random() * 10 - 5) / 100;
+            const newPrice = Math.max(0, product.currentPrice * (1 + changePercent));
+            if (newPrice.toFixed(2) !== product.currentPrice.toFixed(2)) {
+              product.currentPrice = parseFloat(newPrice.toFixed(2));
+              product.priceHistory.push({ date: new Date().toISOString(), price: product.currentPrice });
+              updated = true;
+            }
+          }
+        });
+        if (updated) {
+          saveWishlist();
+          renderWishlist();
+        }
+      }
+
+      // Start the simulation interval (every 60 seconds)
+      setInterval(simulatePriceUpdate, 60000);
+
+    // Initial render
+    renderWishlist();
+
+    // Generate mock recommendations based on wishlist
+    function generateRecommendations() {
+      const recommendationsEl = document.getElementById('recommendations');
+      recommendationsEl.innerHTML = '';
+
+      if (wishlist.length === 0) {
+        recommendationsEl.innerHTML = '<p class="text-gray-500">No recommendations available.</p>';
+        return;
+      }
+
+      // Simple mock recommendation logic:
+      // For each product, recommend 2 products with similar price (+/- 20%)
+      const recs = [];
+      wishlist.forEach((product) => {
+        for (let i = 1; i <= 2; i++) {
+          const priceFluctuation = (Math.random() * 0.4 - 0.2); // -20% to +20%
+          const recPrice = Math.max(1, product.currentPrice * (1 + priceFluctuation));
+          recs.push({
+            name: `${product.name} Variant ${i}`,
+            price: parseFloat(recPrice.toFixed(2)),
+            url: product.url,
+          });
+        }
+      });
+
+      recs.forEach((rec) => {
+        const recEl = document.createElement('div');
+        recEl.className = 'border border-gray-300 rounded p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between';
+
+        const infoEl = document.createElement('div');
+        infoEl.className = 'mb-2 sm:mb-0';
+
+        const nameEl = document.createElement('h3');
+        nameEl.className = 'text-lg font-semibold text-gray-800';
+        nameEl.textContent = rec.name;
+
+        const urlEl = document.createElement('a');
+        urlEl.href = rec.url;
+        urlEl.target = '_blank';
+        urlEl.rel = 'noopener noreferrer';
+        urlEl.className = 'text-blue-600 hover:underline block text-sm mb-1 truncate max-w-xs';
+        urlEl.textContent = rec.url;
+
+        const priceEl = document.createElement('p');
+        priceEl.className = 'text-gray-600';
+        priceEl.textContent = `Price: ₹${rec.price.toFixed(2)}`;
+
+        infoEl.appendChild(nameEl);
+        infoEl.appendChild(urlEl);
+        infoEl.appendChild(priceEl);
+
+        recEl.appendChild(infoEl);
+        recommendationsEl.appendChild(recEl);
+      });
+    }
+
+    // Update recommendations whenever wishlist changes
+    function updateApp() {
+      saveWishlist();
+      renderWishlist();
+      generateRecommendations();
+    }
+
+    // Override existing save and render calls to use updateApp
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('productName').value.trim();
+      const url = document.getElementById('productURL').value.trim();
+      const price = parseFloat(document.getElementById('productPrice').value);
+      if (!name || !url || isNaN(price) || price < 0) {
+        alert('Please enter valid product name, URL, and price.');
+        return;
+      }
+      const newProduct = {
+        name,
+        url,
+        currentPrice: price,
+        priceHistory: [{ date: new Date().toISOString(), price }],
+      };
+      wishlist.push(newProduct);
+      updateApp();
+      form.reset();
+    });
+
+    // Override simulatePriceUpdate to call updateApp
+    function simulatePriceUpdate() {
+      let updated = false;
+      wishlist.forEach((product) => {
+        if (Math.random() < 0.5) {
+          const changePercent = (Math.random() * 10 - 5) / 100;
+          const newPrice = Math.max(0, product.currentPrice * (1 + changePercent));
+          if (newPrice.toFixed(2) !== product.currentPrice.toFixed(2)) {
+            product.currentPrice = parseFloat(newPrice.toFixed(2));
+            product.priceHistory.push({ date: new Date().toISOString(), price: product.currentPrice });
+            updated = true;
+          }
+        }
+      });
+      if (updated) {
+        updateApp();
+      }
+    }
+
+    // Initial render and recommendations
+    updateApp();
+  </script>
 </body>
 </html>
