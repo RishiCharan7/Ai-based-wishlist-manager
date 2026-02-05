@@ -10,28 +10,84 @@
   <style>
     body {
       font-family: 'Roboto', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #1a202c;
+      color: #e2e8f0;
+    }
+    .dark-mode .bg-gray-100 {
+      background-color: #2d3748;
+    }
+    .dark-mode .bg-white {
+      background-color: #4a5568;
+      color: #e2e8f0;
+    }
+    .dark-mode .text-gray-800 {
+      color: #e2e8f0;
+    }
+    .dark-mode .text-gray-700 {
+      color: #cbd5e0;
+    }
+    .dark-mode .text-gray-600 {
+      color: #a0aec0;
+    }
+    .dark-mode .text-gray-500 {
+      color: #718096;
+    }
+    .dark-mode .border-gray-300 {
+      border-color: #4a5568;
+    }
+    .dark-mode .focus\:ring-blue-500:focus {
+      --tw-ring-color: #63b3ed;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
-  <header class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">Price Tracker Wishlist</h1>
-  </header>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <nav class="bg-white shadow-lg dark-mode:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-bold text-gray-800 dark-mode:text-white"><i class="fas fa-tags mr-2"></i>Price Tracker Wishlist</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="darkModeToggle" class="text-gray-600 hover:text-gray-800 dark-mode:text-gray-300 dark-mode:hover:text-white transition">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="text-gray-600 hover:text-gray-800 dark-mode:text-gray-300 dark-mode:hover:text-white transition">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <main class="flex-grow flex flex-col items-center p-4 sm:p-6 lg:p-8">
 
-  <section class="w-full max-w-xl bg-white rounded-lg shadow p-6 mb-6">
-      <form id="addProductForm" class="flex flex-col sm:flex-row gap-4">
+  <section class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 mb-6 animate-fade-in gradient-bg">
+    <h2 class="text-2xl font-bold mb-4 text-white"><i class="fas fa-plus-circle mr-2"></i>Add New Product</h2>
+    <form id="addProductForm" class="flex flex-col md:flex-row gap-4">
       <input
         type="text"
         id="productName"
         placeholder="Product Name"
-        class="flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="flex-grow border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
         required
       />
       <input
         type="url"
         id="productURL"
         placeholder="Product URL"
-        class="flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="flex-grow border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
         required
       />
       <input
@@ -40,28 +96,27 @@
         placeholder="Price in ₹"
         min="0"
         step="0.01"
-        class="w-32 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full md:w-40 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
         required
       />
       <button
         type="submit"
-        class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+        class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition transform hover:scale-105 shadow-lg"
         title="Add product to wishlist"
       >
-        <i class="fas fa-plus mr-2 text-xl"></i>Add
+        <i class="fas fa-plus mr-2"></i>Add
       </button>
     </form>
   </section>
 
-  <section class="w-full max-w-xl bg-white rounded-lg shadow p-6 mb-6">
-    <h2 class="text-xl font-semibold mb-4 text-gray-700">Wishlist</h2>
+  <section class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 mb-6 animate-fade-in">
+    <h2 class="text-2xl font-bold mb-4 text-gray-700"><i class="fas fa-heart mr-2 text-red-500"></i>Wishlist</h2>
     <div id="wishlist" class="space-y-4">
-      <!-- Products will be listed here -->
     </div>
   </section>
 
-  <section class="w-full max-w-xl bg-white rounded-lg shadow p-6">
-    <h2 class="text-xl font-semibold mb-4 text-gray-700">Recommended Products</h2>
+  <section class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 animate-fade-in">
+    <h2 class="text-2xl font-bold mb-4 text-gray-700"><i class="fas fa-lightbulb mr-2 text-yellow-500"></i>Recommended Products</h2>
     <div id="recommendations" class="space-y-4 text-gray-700">
       <p class="text-gray-500">No recommendations available.</p>
     </div>
@@ -70,16 +125,36 @@
   <script>
     const form = document.getElementById('addProductForm');
     const wishlistEl = document.getElementById('wishlist');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
 
-    // Load wishlist from localStorage or initialize empty
     let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-    // Save wishlist to localStorage
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      localStorage.setItem('darkMode', isDarkMode);
+      if (isDarkMode) {
+        body.classList.add('dark-mode');
+        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      } else {
+        body.classList.remove('dark-mode');
+        darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      }
+    }
+
+    if (isDarkMode) {
+      body.classList.add('dark-mode');
+      darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+
+
     function saveWishlist() {
       localStorage.setItem('wishlist', JSON.stringify(wishlist));
     }
 
-    // Render the wishlist UI
     function renderWishlist() {
       wishlistEl.innerHTML = '';
       if (wishlist.length === 0) {
@@ -91,7 +166,7 @@
         const productEl = document.createElement('div');
         productEl.className = 'border border-gray-300 rounded p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between';
 
-        // Product info
+
         const infoEl = document.createElement('div');
         infoEl.className = 'mb-3 sm:mb-0';
 
@@ -110,7 +185,6 @@
         priceEl.className = 'text-gray-600 transition-colors duration-700 flex items-center gap-2';
         priceEl.textContent = `Current Price: ₹${product.currentPrice.toFixed(2)}`;
 
-        // Show price fluctuation arrow
         const priceHistory = product.priceHistory;
         if (priceHistory.length > 1) {
           const prevPrice = priceHistory[priceHistory.length - 2].price;
@@ -125,7 +199,7 @@
           }
         }
 
-        // Highlight price if recently updated (within last 10 seconds)
+        
         const lastUpdate = new Date(product.priceHistory[product.priceHistory.length - 1].date);
         const now = new Date();
         if ((now - lastUpdate) / 1000 < 10) {
@@ -139,17 +213,14 @@
         infoEl.appendChild(urlEl);
         infoEl.appendChild(priceEl);
 
-        // Price history toggle button
         const toggleHistoryBtn = document.createElement('button');
         toggleHistoryBtn.className = 'text-blue-600 hover:underline text-sm mb-2 sm:mb-0';
         toggleHistoryBtn.textContent = 'Show Price History';
         toggleHistoryBtn.type = 'button';
 
-        // Price history container
         const historyEl = document.createElement('div');
         historyEl.className = 'mt-2 hidden text-sm text-gray-700 max-h-40 overflow-y-auto border border-gray-200 rounded p-2 bg-gray-50';
 
-        // Populate price history
         product.priceHistory.forEach((entry) => {
           const entryEl = document.createElement('div');
           const date = new Date(entry.date);
@@ -167,7 +238,6 @@
           }
         });
 
-        // Update price input and button
         const updateForm = document.createElement('form');
         updateForm.className = 'flex gap-2 items-center';
 
@@ -200,7 +270,6 @@
           renderWishlist();
         });
 
-        // Delete product button
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'text-red-600 hover:text-red-800 text-lg';
         deleteBtn.title = 'Remove product from wishlist';
@@ -213,7 +282,6 @@
           }
         });
 
-        // Right side container for update and delete
         const rightSideEl = document.createElement('div');
         rightSideEl.className = 'flex flex-col sm:flex-row sm:items-center gap-3';
 
@@ -229,7 +297,6 @@
       });
     }
 
-      // Add product form submit handler
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('productName').value.trim();
@@ -251,13 +318,10 @@
         form.reset();
       });
 
-      // Simulate real-time price updates by randomly adjusting prices every minute
       function simulatePriceUpdate() {
         let updated = false;
         wishlist.forEach((product) => {
-          // Randomly decide whether to update price (50% chance)
           if (Math.random() < 0.5) {
-            // Random price change between -5% and +5%
             const changePercent = (Math.random() * 10 - 5) / 100;
             const newPrice = Math.max(0, product.currentPrice * (1 + changePercent));
             if (newPrice.toFixed(2) !== product.currentPrice.toFixed(2)) {
@@ -273,13 +337,9 @@
         }
       }
 
-      // Start the simulation interval (every 60 seconds)
       setInterval(simulatePriceUpdate, 60000);
 
-    // Initial render
     renderWishlist();
-
-    // Generate mock recommendations based on wishlist
     function generateRecommendations() {
       const recommendationsEl = document.getElementById('recommendations');
       recommendationsEl.innerHTML = '';
@@ -289,8 +349,6 @@
         return;
       }
 
-      // Simple mock recommendation logic:
-      // For each product, recommend 2 products with similar price (+/- 20%)
       const recs = [];
       wishlist.forEach((product) => {
         for (let i = 1; i <= 2; i++) {
@@ -335,14 +393,12 @@
       });
     }
 
-    // Update recommendations whenever wishlist changes
     function updateApp() {
       saveWishlist();
       renderWishlist();
       generateRecommendations();
     }
 
-    // Override existing save and render calls to use updateApp
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = document.getElementById('productName').value.trim();
@@ -363,7 +419,6 @@
       form.reset();
     });
 
-    // Override simulatePriceUpdate to call updateApp
     function simulatePriceUpdate() {
       let updated = false;
       wishlist.forEach((product) => {
@@ -381,8 +436,6 @@
         updateApp();
       }
     }
-
-    // Initial render and recommendations
     updateApp();
   </script>
 </body>
